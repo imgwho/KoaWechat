@@ -10,6 +10,7 @@ module.exports = function (opts) {
 
 	return function *(next) {
 		// console.log(this.query)
+		var that = this
 		var token = opts.token
 		var signature = this.query.signature
 		var nonce = this.query.nonce
@@ -42,6 +43,26 @@ module.exports = function (opts) {
 			var content = yield util.parseXMLAsync(data)
 
 			console.log(content)
+
+			var message = util.formatMessage(content.xml)
+
+			console.log(message)
+
+			if (message.MsgType === 'event') {
+				if (message.Event === 'subscribe') {
+					var now = new Date().getTime()
+
+					that.status = 200
+					that.type = 'application/xml'
+					that.body = '<xml>' +
+						'<ToUserName><![CDATA[' + message.FromUserName + ']]></ToUserName>' +
+						'<FromUserName><![CDATA[' + message.ToUserName + ']]></FromUserName>' +
+						'<CreateTime>12345678</CreateTime>' +
+						'<MsgType><![CDATA[text]]></MsgType>' +
+						'<Content><![CDATA[欢迎关注淡月清云~~ (づ｡◕‿‿◕｡)づ]]></Content>' +
+						'</xml>'
+				}
+			}
 		}
 	}
 }
